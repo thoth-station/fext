@@ -102,3 +102,7 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# valgrind
+valgrind-output
+.requirements-python3-debug
