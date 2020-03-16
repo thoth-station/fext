@@ -1,0 +1,14 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+pytest = "*"
+pytest-timeout = "*"
+hypothesis = "*"
+pytest-leaks = "*"
+pytest-valgrind = "*"
+pytest-random-order = "*"
+
+[packages]

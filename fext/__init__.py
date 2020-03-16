@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# project template
-# Copyright(C) 2010 Red Hat, Inc.
+# fext
+# Copyright(C) 2020 Fridolin Pokorny
 #
 # This program is free software: you can redistribute it and / or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,6 +15,16 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-"""This file carries the version of the template project."""
+"""Extensions to standard Python's heapq for performance applications."""
 
+__title__ = "thoth-adviser"
 __version__ = "0.1.0"
+__author__ = "Fridolin Pokorny <fridolin@redhat.com>"
+
+from .edict import ExtDict
+from .eheapq import ExtHeapQueue
+
+__all__ = [
+    "ExtDict",
+    "ExtHeapQueue",
+]
