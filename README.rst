@@ -159,6 +159,20 @@ Finally, upload artifacts to PyPI:
 
   twine upload dist/*
 
+Installation
+============
+
+The project is `hosted on PyPI <https://pypi.org/project/fext/>`_. You can
+install it via ``pip`` or ``Pipenv``:
+
+.. code-block:: console
+
+  pipenv install fext
+  # pip3 install fext
+
+If there is no release conforming your system, a build process is triggered
+during the installation - requires ``python3-devel`` and ``gcc/g++``.
+
 Usage
 =====
 
