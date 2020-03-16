@@ -8,8 +8,8 @@ built-in types. The implementation relies on enforced protocol - all the
 objects and abstract data types are implemented in C/C++ to provide highly
 effective manipulation.
 
-Extended dict - fext.edict.ExtDict
-==================================
+Extended dict - fext.ExtDict
+============================
 
 The implementation of ``fext.ExtDict`` was introduce to provide a data
 structure capable of limiting number of items stored in a dictionary (a hash
@@ -17,6 +17,7 @@ table).
 
 .. figure:: https://raw.githubusercontent.com/thoth-station/fext/master/fig/fext_extdict.png
    :align: center
+   :scale: 40%
 
 ``fext.ExtDict`` is implemented as a standard Python ``dict`` and supports most
 ``dict`` methods. To restrict number of items stored in the dictionary,
@@ -29,14 +30,15 @@ The comparision is done solely on the actual value. Keys are stored in min-heap
 queue together with values as pairs to guarantee O(1) time when removing an
 item from the ``fext.edictExtDict``.
 
-Extended heapq - fext.edict.ExtHeapQueue
-========================================
+Extended heapq - fext.ExtHeapQueue
+==================================
 
 The extended heap queue acts as a min-heap queue from the standard Python
 library.  It uses a hash table for storing information about indexes (where
 values sit in the min-heap queue) to optimize removals from the heap.
 
 .. figure:: https://raw.githubusercontent.com/thoth-station/fext/master/fig/fext_extheapq.png
+   :scale: 40%
    :align: center
 
 Using fext in a C++ project
@@ -157,3 +159,8 @@ Finally, upload artifacts to PyPI:
 
   twine upload dist/*
 
+Usage
+=====
+
+These data structures were designed for Thoth's adviser - for data kept in
+resolver's internal state as well as in the reinforcement learning part.
