@@ -109,6 +109,24 @@ static PyObject *ExtHeapQueue_last(ExtHeapQueue *self) {
   return item;
 }
 
+static PyObject *ExtHeapQueue_get(ExtHeapQueue *self, PyObject *args) {
+  PyObject *item;
+  size_t idx;
+
+  if (!PyArg_ParseTuple(args, "k", &idx))
+    return NULL;
+
+  try {
+    item = self->heap->get(idx);
+  } catch (EHeapQIndexError &exc) {
+    PyErr_SetString(PyExc_IndexError, exc.what());
+    return NULL;
+  }
+
+  Py_INCREF(item);
+  return item;
+}
+
 static PyObject *ExtHeapQueue_pushpop(ExtHeapQueue *self, PyObject *args) {
   PyObject *item, *to_return;
 
@@ -140,7 +158,6 @@ static PyObject *ExtHeapQueue_push(ExtHeapQueue *self, PyObject *args) {
     return NULL;
 
   try {
-    PyObject * removed;
     self->heap->push(item, removed_callback);
     Py_INCREF(item);
   } catch (ObjCmpErr &exc) {
@@ -212,6 +229,18 @@ static PyObject *ExtHeapQueue_replace(ExtHeapQueue *self, PyObject *args) {
   return result;
 }
 
+PyObject *ExtHeapQueue_items(ExtHeapQueue *self) {
+  PyObject *result = PyList_New(self->heap->get_length());
+
+  int i = 0;
+  for (auto it = self->heap->begin(); it != self->heap->end(); ++it, ++i) {
+    Py_INCREF(*it);
+    PyList_SET_ITEM(result, i, *it);
+  }
+
+  return result;
+}
+
 static PyObject *ExtHeapQueue_max(ExtHeapQueue *self) {
   PyObject *item;
 
@@ -250,12 +279,16 @@ static PyMethodDef ExtHeapQueue_methods[] = {
      "Push item on the heap, then pop and return the smallest item from the "
      "heap. The combined action runs more efficiently than heappush() followed "
      "by a separate call tprint(a.get_size())o heappop()."},
+    {"items", (PyCFunction)ExtHeapQueue_items, METH_VARARGS,
+     "Return a list containing objects stored in the heap."},
     {"pop", (PyCFunction)ExtHeapQueue_pop, METH_NOARGS,
      "Pops top item from the heap."},
     {"replace", (PyCFunction)ExtHeapQueue_replace, METH_VARARGS,
      "Pops top item, and adds new item; the heap size is unchanged."},
     {"get_top", (PyCFunction)ExtHeapQueue_top, METH_NOARGS,
      "Gets top item from the heap, the heap is untouched."},
+    {"get", (PyCFunction)ExtHeapQueue_get, METH_VARARGS,
+     "Get an index from the heap based on the index to the internal heap."},
     {"get_last", (PyCFunction)ExtHeapQueue_last, METH_NOARGS,
      "Get last item added, if the item is still present in the heap."},
     {"get_max", (PyCFunction)ExtHeapQueue_max, METH_NOARGS,
