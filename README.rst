@@ -125,19 +125,25 @@ To clean up your environment, perform:
 Building and releasing
 ======================
 
-First, let's run a containerized environment (make sure you are in the root of
-this repo):
+The release can be done from a containerized environment:
 
 .. code-block:: console
 
-  podman run --rm --entrypoint bash -it --volume ./:/home:Z centos:8
+  podman run --rm --workdir /io --entrypoint bash -it --volume `pwd`:/io:Z quay.io/pypa/manylinux2014_x86_64 -c "install -y make && make all"
+
+To check what's happening, let's run a containerized environment - this can be
+helpful when you are testing or developing the extension:
+
+.. code-block:: console
+
+  podman run --rm --workdir /io --entrypoint bash -it --volume `pwd`:/io:Z quay.io/pypa/manylinux2014_x86_64
 
 The following commands (run in the container stated above) will install all
 the necessary tools:
 
 .. code-block:: console
 
-  dnf install -y make
+  yum install -y make
   make deps
 
 Once tests pass, clean the environment:
@@ -146,18 +152,22 @@ Once tests pass, clean the environment:
 
   make clean
 
-Now we should be ready to produce ``bdist`` and ``sdist`` distribution for PyPI:
+Now we should be ready to produce ``bdist_wheel`` and ``sdist`` distribution
+for PyPI:
 
 .. code-block:: console
 
-  python3 setup.py bdist
+  python3 setup.py bdist_wheel
   python3 setup.py sdist
 
 Finally, upload artifacts to PyPI:
 
 .. code-block:: console
 
-  twine upload dist/*
+  auditwheel repair fext/*.whl
+  twine upload wheelhouse/*.whl
+
+Alternativelly you can let ``make all`` happen.
 
 Usage
 =====

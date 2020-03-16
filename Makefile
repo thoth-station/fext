@@ -4,14 +4,15 @@
 .PHONY: clean
 clean:
 	rm -rf build/ dist/ fext/*.so fext.egg-info/
-	pipenv --rm
+	pipenv --rm || true
 
 .PHONY: deps
 deps:
-	dnf install -y python3 python3-devel python3-debug \
+	yum install -y python3 python3-devel python3-debug \
 		valgrind valgrind-devel gcc gcc-c++ which git
 	which pipenv || pip3 install pipenv
 	which twine || pip3 install twine
+	pip3 install --upgrade setuptools wheel
 
 .PHONY: check-refcount
 check-refcount:
@@ -36,3 +37,14 @@ test:
 .PHONY: check
 check: test check-refcount check-leaks
 
+.PHONY: build
+build:
+	python3 setup.py sdist bdist_wheel
+
+.PHONY: release
+release:
+	auditwheel repair dist/*.whl
+	twine upload wheelhouse/*.whl dist/*.tar.gz
+
+.PHONY: all
+all: deps check clean build release

@@ -69,9 +69,18 @@ setup(
     url="https://github.com/thoth-station/fext",
     download_url="https://pypi.org/project/fext",
     license="GPLv3+",
+    packages=["fext"],
     ext_modules=[
-        Extension("fext.eheapq", sources=["fext/eheapq.cpp"]),
-        Extension("fext.edict", sources=["fext/edict.cpp"]),
+        Extension(
+            "fext.eheapq",
+            sources=["fext/eheapq.cpp"],
+            extra_compile_args = ["-std=c++11"],
+        ),
+        Extension(
+            "fext.edict",
+            sources=["fext/edict.cpp"],
+            extra_compile_args = ["-std=c++11"],
+        ),
     ],
     cmdclass={"test": Test},
 )
