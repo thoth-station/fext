@@ -28,14 +28,16 @@ dictionary, ``fext.ExtDict`` checks its size and possibly performs
 
 The comparision is done solely on the actual value. Keys are stored in min-heap
 queue together with values as pairs to guarantee O(1) time when removing an
-item from the ``fext.edictExtDict``.
+item from the ``fext.edictExtDict`` and O(log(N)) when removing the item from the
+underlying min-heap queue.
 
 Extended heapq - fext.ExtHeapQueue
 ==================================
 
 The extended heap queue acts as a min-heap queue from the standard Python
 library.  It uses a hash table for storing information about indexes (where
-values sit in the min-heap queue) to optimize removals from the heap.
+values sit in the min-heap queue) to optimize removals from the heap
+to O(log(N)).
 
 .. figure:: https://raw.githubusercontent.com/thoth-station/fext/master/fig/fext_extheapq.png
    :scale: 40%
@@ -76,10 +78,10 @@ Check sections below for more info on testing the C/C++ parts of extensions.
 Reference count and memory leak checks
 ======================================
 
-You can find Makefile in the Git repo. This repo defines targets to perform
-leak checks and reference count checks. Note they use different Python
-interpreters so make sure you do not mix virtual environments when running the
-tests.
+You can find ``Makefile`` in the Git repo. This repo defines targets to
+perform leak checks and reference count checks. Note they use different Python
+interpreters (with/without debug information) so make sure you do not mix
+virtual environments when running the tests.
 
 .. code-block:: console
 
@@ -111,7 +113,7 @@ check-refcount``. The last part of the test suite runs valgrind against the
 test suite - you can explicitly trigger this part by calling ``make
 check-leaks``.
 
-Mind ``make-refcount`` and ``make check-leaks`` will take some time given the
+Mind ``make check-refcount`` and ``make check-leaks`` will take some time given the
 checks and processing that is done on the background. To verify your changes
 more iterativelly, ``make test`` should do the trick (don't forget to do ``make
 check`` after that though).
