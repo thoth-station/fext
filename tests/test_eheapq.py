@@ -503,3 +503,51 @@ class TestEHeapq(FextTestBase):
         heap.clear()
 
         assert len(heap) == 0
+
+    def test_get(self) -> None:
+        """Test getting an element by its index."""
+        heap = ExtHeapQueue()
+
+        heap.push("101")
+
+        assert heap.get(0) == "101"
+
+        heap.push("202")
+        heap.push("303")
+
+        possibilities = {"101", "202", "303"}
+
+        assert heap.get(0) in possibilities
+        assert heap.get(1) in possibilities
+        assert heap.get(2) in possibilities
+
+    def test_get_out_of_range(self) -> None:
+        """Test raising an exception when accessing out of range."""
+        heap = ExtHeapQueue()
+
+        with pytest.raises(IndexError, match="index out of range"):
+            heap.get(0)
+
+        with pytest.raises(IndexError, match="index out of range"):
+            heap.get(110)
+
+        with pytest.raises(IndexError, match="index out of range"):
+            heap.get(199)
+
+        heap.push("11")
+        heap.push("22")
+
+        with pytest.raises(IndexError, match="index out of range"):
+            heap.get(110)
+
+    def test_items(self) -> None:
+        """Test raising an exception when accessing out of range."""
+        heap = ExtHeapQueue()
+
+        assert heap.items() == []
+
+        heap.push("11")
+        heap.push("22")
+        heap.push("33")
+
+        assert set(heap.items()) == {"11", "22", "33"}

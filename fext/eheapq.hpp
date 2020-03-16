@@ -78,6 +78,16 @@ public:
 } EHeapQNoLastExc;
 
 /**
+ * An exception raised when accessing elements outside of heap.
+ */
+class EHeapQIndexError : public EHeapQException {
+public:
+  virtual const char *what() const throw() {
+    return "index out of range";
+  }
+} EHeapQIndexErrorExc;
+
+/**
  * Implementation of an extended min or max heap queue
  * that stores at top `size' items. It also stores
  * information about the max and the last item stored. It
@@ -327,6 +337,37 @@ public:
     this->maybe_adjust_max(result);
 
     return result;
+  }
+
+  /**
+   * Access an element stored in the heap, do not respect relative ordering based on value.
+   *
+   * @param idx Index to the internal heap.
+   * @raises EHeapQIndexError If accessing an element outside of the heap.
+   */
+  T get(size_t idx) const {
+    if (idx >= this->get_length())
+      throw EHeapQIndexErrorExc;
+
+    return this->heap->at(idx);
+  }
+
+  /**
+   * Get iterator to the heap.
+   *
+   * @result The beginning for the iterator.
+   */
+  typename std::vector<T>::const_iterator begin(void) const noexcept {
+    return this->heap->begin();
+  }
+
+  /**
+   * Get the end iterator to the heap.
+   *
+   * @result The end iterator to the heap.
+   */
+  typename std::vector<T>::const_iterator end(void) const noexcept {
+    return this->heap->end();
   }
 
   /**
