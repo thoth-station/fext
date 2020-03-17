@@ -385,16 +385,16 @@ public:
     if (idx_value == this->index_map->end())
       throw EHeapQNotFoundExc;
 
-    if (size > 0 && item == arr[size - 1]) {
-      this->heap->pop_back();
-      this->index_map->erase(item);
-      goto end;
-    }
-
     idx = idx_value->second;
-    this->heap->data()[idx] = this->heap->data()[this->heap->size() - 1];
+    this->heap->at(idx) = this->heap->at(this->heap->size() - 1);
+
     this->heap->pop_back();
     this->index_map->erase(item);
+    if (size > 0 && idx == size - 1)
+      goto end;
+
+    this->index_map->erase(this->heap->at(idx));
+    this->index_map->insert({this->heap->at(idx), idx});
 
     if (idx < this->heap->size()) {
       this->siftup(idx);
