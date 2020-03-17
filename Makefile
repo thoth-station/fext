@@ -3,7 +3,7 @@
 
 .PHONY: clean
 clean:
-	rm -rf build/ dist/ fext/*.so fext.egg-info/
+	rm -rf build/ dist/ fext/*.so fext.egg-info/ wheelhouse/
 	pipenv --rm || true
 
 .PHONY: deps
