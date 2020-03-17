@@ -135,15 +135,14 @@ static PyObject *ExtHeapQueue_pushpop(ExtHeapQueue *self, PyObject *args) {
 
   try {
     to_return = self->heap->pushpop(item);
-    Py_INCREF(item);
   } catch (ObjCmpErr &exc) {
-    PyErr_SetString(PyExc_ValueError, exc.what());
     return NULL;
   } catch (EHeapQAlreadyPresent &exc) {
     PyErr_SetString(PyExc_ValueError, exc.what());
     return NULL;
   }
 
+  Py_INCREF(item);
   return to_return;
 }
 
@@ -161,7 +160,6 @@ static PyObject *ExtHeapQueue_push(ExtHeapQueue *self, PyObject *args) {
     self->heap->push(item, removed_callback);
     Py_INCREF(item);
   } catch (ObjCmpErr &exc) {
-    PyErr_SetString(PyExc_ValueError, exc.what());
     return NULL;
   } catch (EHeapQAlreadyPresent &exc) {
     PyErr_SetString(PyExc_ValueError, exc.what());
@@ -214,7 +212,6 @@ static PyObject *ExtHeapQueue_replace(ExtHeapQueue *self, PyObject *args) {
   try {
     result = self->heap->replace(item);
   } catch (ObjCmpErr &exc) {
-    PyErr_SetString(PyExc_ValueError, exc.what());
     return NULL;
   } catch (EHeapQEmpty &exc) {
     Py_DECREF(item);
@@ -246,6 +243,8 @@ static PyObject *ExtHeapQueue_max(ExtHeapQueue *self) {
 
   try {
     item = self->heap->get_peak();
+  } catch (ObjCmpErr &exc) {
+    return NULL;
   } catch (EHeapQEmpty &exc) {
     PyErr_SetString(PyExc_KeyError, exc.what());
     return NULL;
