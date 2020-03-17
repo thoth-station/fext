@@ -190,7 +190,7 @@ class TestEDict(FextTestBase):
         edict = ExtDict()
         edict[1] = _A()
 
-        with pytest.raises(ValueError, match="failed to compare Python objects"):
+        with pytest.raises(TypeError, match="'<' not supported between instances of '_A' and '_A'"):
             edict[2] = _A()
 
     def test_clear(self) -> None:
