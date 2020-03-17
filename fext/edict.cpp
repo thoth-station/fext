@@ -120,7 +120,6 @@ int ExtDict_setitem(ExtDict *self, PyObject *key, PyObject *value) {
   try {
     self->dict->set_or_replace(key, value, added_callback, removed_callback);
   } catch (ObjCmpErr &exc) {
-    PyErr_SetString(PyExc_ValueError, exc.what());
     return -1;
   }
 
