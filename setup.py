@@ -76,11 +76,6 @@ setup(
             sources=["fext/eheapq.cpp"],
             extra_compile_args = ["-std=c++11"],
         ),
-        Extension(
-            "fext.edict",
-            sources=["fext/edict.cpp"],
-            extra_compile_args = ["-std=c++11"],
-        ),
     ],
     cmdclass={"test": Test},
 )

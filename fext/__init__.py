@@ -25,6 +25,5 @@ from .edict import ExtDict
 from .eheapq import ExtHeapQueue
 
 __all__ = [
-    "ExtDict",
     "ExtHeapQueue",
 ]
