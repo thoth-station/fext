@@ -8,29 +8,6 @@ built-in types. The implementation relies on enforced protocol - all the
 objects and abstract data types are implemented in C/C++ to provide highly
 effective manipulation.
 
-Extended dict - fext.ExtDict
-============================
-
-The implementation of ``fext.ExtDict`` was introduce to provide a data
-structure capable of limiting number of items stored in a dictionary (a hash
-table).
-
-.. figure:: https://raw.githubusercontent.com/thoth-station/fext/master/fig/fext_extdict.png
-   :align: center
-   :scale: 40%
-
-``fext.ExtDict`` is implemented as a standard Python ``dict`` and supports most
-``dict`` methods. To restrict number of items stored in the dictionary,
-``fext.edict.ExtDict`` uses a min-heap queue that stores key-value pairs (key
-to the dictionary with it's value). When an item is inserted into the
-dictionary, ``fext.ExtDict`` checks its size and possibly performs
-``pushpop``-like operation on the heap to limit number of items stored.
-
-The comparision is done solely on the actual value. Keys are stored in min-heap
-queue together with values as pairs to guarantee O(1) time when removing an
-item from the ``fext.edictExtDict`` and O(log(N)) when removing the item from the
-underlying min-heap queue.
-
 Extended heapq - fext.ExtHeapQueue
 ==================================
 
