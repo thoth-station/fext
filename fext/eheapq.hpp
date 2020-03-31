@@ -259,7 +259,7 @@ public:
     if (this->heap->size() == this->size) {
       T removed = this->pushpop(item);
 
-      if (removed != item)
+      if (removed != item && removed_callback)
         removed_callback(removed);
 
       return;
