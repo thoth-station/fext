@@ -108,7 +108,7 @@ The release can be done from a containerized environment:
 
 .. code-block:: console
 
-  podman run --rm --workdir /io --entrypoint bash -it --volume `pwd`:/io:Z quay.io/pypa/manylinux2014_x86_64 -c "install -y make && make all"
+  podman run --rm --workdir /io --entrypoint bash -it --volume `pwd`:/io:Z quay.io/pypa/manylinux2014_x86_64 -c "yum install -y make && make all"
 
 To check what's happening, let's run a containerized environment - this can be
 helpful when you are testing or developing the extension:
