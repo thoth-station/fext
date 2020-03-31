@@ -104,13 +104,10 @@ public:
    */
   EHeapQ(size_t size = EHEAPQ_DEFAULT_SIZE) {
     this->size = size;
-
     this->index_map = new std::unordered_map<T, size_t, Hash>;
     this->heap = new std::vector<T>;
-
     this->last_item_set = false;
     this->max_item_set = false;
-
     this->comp = Compare();
   }
 
@@ -307,7 +304,7 @@ public:
     this->heap->pop_back();
     this->index_map->erase(result);
 
-    siftup(0);
+    this->siftup(0);
 
     this->maybe_del_last_item(result);
     this->maybe_del_max_item(result);
@@ -334,7 +331,7 @@ public:
     this->index_map->erase(result);
     this->index_map->insert({item, 0});
 
-    siftup(0);
+    this->siftup(0);
 
     this->set_last_item(result);
     this->maybe_del_max_item(result);
