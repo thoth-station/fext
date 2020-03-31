@@ -139,13 +139,11 @@ public:
    * @raises EHeapQEmpty If the given heap queue is empty.
    */
   T get_last() const {
-    if (this->heap->size() == 0) {
+    if (this->heap->size() == 0)
       throw EHeapQEmptyExc;
-    }
 
-    if (!this->last_item_set) {
+    if (!this->last_item_set)
       throw EHeapQNoLastExc;
-    }
 
     return this->last_item;
   }
@@ -206,12 +204,17 @@ public:
     if (this->max_item_set)
       return this->max_item;
 
-    T result = this->heap->data()[this->heap->size() / 2];
-    for (auto i = (this->heap->size() / 2) + 1; i < this->heap->size(); i++) {
-      if (this->comp(result, this->heap->data()[i]))
-        result = this->heap->data()[i];
+    size_t idx = this->heap->size() / 2;
+    T result = this->heap->data()[idx];
+    for (auto i = idx + 1; i < this->heap->size(); i++) {
+      T tmp = this->heap->data()[i];
+      if (this->comp(result, tmp)) {
+        idx = i;
+        result = tmp;
+      }
     }
 
+    this->max_item_idx = idx;
     this->max_item = result;
     return result;
   }
@@ -276,10 +279,12 @@ public:
 
     this->set_last_item(item);
 
-    if (this->heap->size() == 1)
-      this->set_max_item(item);
-    else
-      maybe_adjust_max(item);
+    if (this->heap->size() == 1) {
+      this->max_item_idx = 0;
+      this->max_item = item;
+    } else {
+      maybe_adjust_max_item(item);
+    }
   }
 
   /**
@@ -334,7 +339,6 @@ public:
 
     this->set_last_item(result);
     this->maybe_del_max_item(result);
-    this->maybe_adjust_max(result);
 
     return result;
   }
@@ -378,7 +382,6 @@ public:
    */
   void remove(T item) {
     auto size = this->heap->size();
-    auto arr = this->heap->data();
     unsigned long idx;
 
     auto idx_value = this->index_map->find(item);
@@ -412,7 +415,8 @@ private:
   Compare comp;         /**< The function class that implements comparision. */
   T last_item;          /**< The last item stored. */
   bool last_item_set;   /**< Set to true if the last item is present, false otherwise. */
-  T max_item;           /**< The maximum item stored, used a cached value. */
+  T max_item;           /**< The max item stored. */
+  size_t max_item_idx;  /**< The maximum item stored, used a cached value. */
   bool max_item_set;    /**< Set to true if the max item is present, false otherwise. */
 
   /**
@@ -456,6 +460,13 @@ private:
       this->index_map->at(newitem) = parentpos;
       this->index_map->at(parent) = pos;
       pos = parentpos;
+
+      if (this->max_item_set) {
+        if (this->max_item_idx == parentpos)
+          this->max_item_idx = pos;
+        else if (this->max_item_idx == pos)
+          this->max_item_idx = parentpos;
+      }
     }
   }
 
@@ -492,6 +503,14 @@ private:
       this->index_map->at(tmp2) = childpos;
       this->index_map->at(tmp1) = pos;
       pos = childpos;
+
+      /* Change reference to max, as needed. */
+      if (this->max_item_set) {
+        if (this->max_item_idx == childpos)
+          this->max_item_idx = pos;
+        else if (this->max_item_idx == pos)
+          this->max_item_idx = childpos;
+      }
     }
 
     /* Bubble it up to its final resting place (by sifting its parents down). */
@@ -502,26 +521,22 @@ private:
     this->last_item = item;
     this->last_item_set = true;
   }
-  void set_max_item(T item) noexcept {
-    this->max_item = item;
-    this->max_item_set = true;
-  }
 
   void maybe_del_last_item(T item) noexcept {
     if (this->last_item_set && this->last_item == item) {
       this->last_item_set = false;
     }
   }
+
   void maybe_del_max_item(T item) noexcept {
     if (this->max_item_set && this->max_item == item) {
       this->max_item_set = false;
     }
   }
-  void maybe_adjust_max(T item) noexcept {
-    if (!this->max_item_set)
-      return;
 
-    if (this->comp(this->max_item, item))
+  void maybe_adjust_max_item(T item) noexcept {
+    if (this->max_item_set && this->comp(this->max_item, item)) {
       this->max_item = item;
+    }
   }
 };
