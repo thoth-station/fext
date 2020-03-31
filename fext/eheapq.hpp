@@ -238,8 +238,7 @@ public:
       this->siftup(0);
 
       this->set_last_item(item);
-      this->maybe_del_max_item(item);
-      this->maybe_adjust_max(item);
+      this->maybe_del_max_item(to_return);
 
       return to_return;
     }
