@@ -17,6 +17,10 @@
  */
 
 #define PY_SSIZE_T_CLEAN
+#ifndef FEXT_DANGEROUS
+ // Omit some of the checks to gain performance. By enabling this the lib can get unstable in some cases.
+ #define FEXT_DANGEROUS
+#endif
 
 extern "C" {
 #include <Python.h>
@@ -28,11 +32,35 @@ extern "C" {
 #include <unordered_map>
 #include <vector>
 
-#include "common.hpp"
 #include "eheapq.hpp"
 
+class PyObjectCompare {
+public:
+  std::unordered_map<PyObject *, float> *key_map;  /**< A hash map used to store keys used for obj comparision. */
+
+  PyObjectCompare() {
+    this->key_map = new std::unordered_map<PyObject *, float>;
+  }
+
+  ~PyObjectCompare() {
+    delete this->key_map;
+  }
+
+  bool operator()(PyObject *a, PyObject *b) {
+    // comparision keys need to be always present.
+    float a_key = this->key_map->at(a);
+    float b_key = this->key_map->at(b);
+    return a_key < b_key;
+  }
+
+  void removed_callback(PyObject *item) {
+    this->key_map->erase(item);
+    Py_DECREF(item);
+  }
+};
+
 typedef struct {
-  PyObject_HEAD EHeapQ<PyObject *, PyObjectRichCmpLT> *heap;
+  PyObject_HEAD EHeapQ<PyObject *, PyObjectCompare> *heap;
 } ExtHeapQueue;
 
 static int ExtHeapQueue_traverse(ExtHeapQueue *self, visitproc visit,
@@ -48,6 +76,7 @@ static int ExtHeapQueue_clear(ExtHeapQueue *self) {
     Py_DECREF(i);
 
   self->heap->clear();
+  self->heap->comp.key_map->clear();
   return 0;
 }
 
@@ -62,7 +91,7 @@ static PyObject *ExtHeapQueue_new(PyTypeObject *type, PyObject *args,
                                   PyObject *kwds) {
   ExtHeapQueue *self;
   self = (ExtHeapQueue *)type->tp_alloc(type, 0);
-  self->heap = new EHeapQ<PyObject *, PyObjectRichCmpLT>;
+  self->heap = new EHeapQ<PyObject *, PyObjectCompare>;
   return (PyObject *)self;
 }
 
@@ -129,15 +158,25 @@ static PyObject *ExtHeapQueue_get(ExtHeapQueue *self, PyObject *args) {
 
 static PyObject *ExtHeapQueue_pushpop(ExtHeapQueue *self, PyObject *args) {
   PyObject *item, *to_return;
+  double key;
 
-  if (!PyArg_ParseTuple(args, "O", &item))
+  if (!PyArg_ParseTuple(args, "dO", &key, &item))
     return NULL;
+
+#ifndef FEXT_DANGEROUS
+  if (self->heap->comp.key_map->find(item) != self->heap->comp.key_map->end()) {
+    PyErr_SetString(PyExc_ValueError, EHeapQAlreadyPresentExc.what());
+    return NULL;
+  }
+#endif
+
+  self->heap->comp.key_map->insert({item, key});
 
   try {
     to_return = self->heap->pushpop(item);
-  } catch (ObjCmpErr &exc) {
-    return NULL;
   } catch (EHeapQAlreadyPresent &exc) {
+    // This is to complement FEXT_DANGEROUS before. Note the key gets overwritten, hence dangerous.
+    self->heap->comp.key_map->erase(item);
     PyErr_SetString(PyExc_ValueError, exc.what());
     return NULL;
   }
@@ -146,22 +185,29 @@ static PyObject *ExtHeapQueue_pushpop(ExtHeapQueue *self, PyObject *args) {
   return to_return;
 }
 
-static void removed_callback(PyObject *item) {
-  Py_DECREF(item);
-}
-
 static PyObject *ExtHeapQueue_push(ExtHeapQueue *self, PyObject *args) {
   PyObject *item;
+  double key;
 
-  if (!PyArg_ParseTuple(args, "O", &item))
+  if (!PyArg_ParseTuple(args, "dO", &key, &item))
     return NULL;
 
+#ifndef FEXT_DANGEROUS
+  if (self->heap->comp.key_map->find(item) != self->heap->comp.key_map->end()) {
+     PyErr_SetString(PyExc_ValueError, EHeapQAlreadyPresentExc.what());
+     return NULL;
+  }
+#endif
+
+  self->heap->comp.key_map->insert({item, key});
+
+  std::function<void(PyObject *)> f = std::bind(&PyObjectCompare::removed_callback, &self->heap->comp, std::placeholders::_1);
   try {
-    self->heap->push(item, removed_callback);
+    self->heap->push(item, f);
     Py_INCREF(item);
-  } catch (ObjCmpErr &exc) {
-    return NULL;
   } catch (EHeapQAlreadyPresent &exc) {
+    // This is to complement FEXT_DANGEROUS before. Note the key gets overwritten, hence dangerous.
+    self->heap->comp.key_map->erase(item);
     PyErr_SetString(PyExc_ValueError, exc.what());
     return NULL;
   }
@@ -179,6 +225,7 @@ static PyObject *ExtHeapQueue_pop(ExtHeapQueue *self) {
     return NULL;
   }
 
+  self->heap->comp.key_map->erase(item);
   return item;
 }
 
@@ -197,33 +244,9 @@ static PyObject *ExtHeapQueue_remove(ExtHeapQueue *self, PyObject *args) {
     return NULL;
   }
 
+  self->heap->comp.key_map->erase(item);
   Py_DECREF(item);
   Py_RETURN_NONE;
-}
-
-static PyObject *ExtHeapQueue_replace(ExtHeapQueue *self, PyObject *args) {
-  PyObject *item;
-  PyObject *result;
-
-  if (!PyArg_ParseTuple(args, "O", &item))
-    return NULL;
-
-  Py_INCREF(item);
-  try {
-    result = self->heap->replace(item);
-  } catch (ObjCmpErr &exc) {
-    return NULL;
-  } catch (EHeapQEmpty &exc) {
-    Py_DECREF(item);
-    PyErr_SetString(PyExc_KeyError, exc.what());
-    return NULL;
-  } catch (EHeapQAlreadyPresent &exc) {
-    Py_DECREF(item);
-    PyErr_SetString(PyExc_ValueError, exc.what());
-    return NULL;
-  }
-
-  return result;
 }
 
 PyObject *ExtHeapQueue_items(ExtHeapQueue *self) {
@@ -243,8 +266,6 @@ static PyObject *ExtHeapQueue_max(ExtHeapQueue *self) {
 
   try {
     item = self->heap->get_peak();
-  } catch (ObjCmpErr &exc) {
-    return NULL;
   } catch (EHeapQEmpty &exc) {
     PyErr_SetString(PyExc_KeyError, exc.what());
     return NULL;
@@ -282,8 +303,6 @@ static PyMethodDef ExtHeapQueue_methods[] = {
      "Return a list containing objects stored in the heap."},
     {"pop", (PyCFunction)ExtHeapQueue_pop, METH_NOARGS,
      "Pops top item from the heap."},
-    {"replace", (PyCFunction)ExtHeapQueue_replace, METH_VARARGS,
-     "Pops top item, and adds new item; the heap size is unchanged."},
     {"get_top", (PyCFunction)ExtHeapQueue_top, METH_NOARGS,
      "Gets top item from the heap, the heap is untouched."},
     {"get", (PyCFunction)ExtHeapQueue_get, METH_VARARGS,

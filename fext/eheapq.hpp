@@ -97,6 +97,8 @@ public:
  */
 template <class T, class Compare = std::less<T>, class Hash = std::hash<T>> class EHeapQ {
 public:
+  Compare comp;         /**< The function class that implements comparision. */
+
   /**
    * Constructor.
    *
@@ -108,7 +110,6 @@ public:
     this->heap = new std::vector<T>;
     this->last_item_set = false;
     this->max_item_set = false;
-    this->comp = Compare();
   }
 
   ~EHeapQ() {
@@ -249,7 +250,7 @@ public:
    * @param item The item to be stored in the heap.
    * @param no_removed Value returned if no item was removed.
    */
-  void push(T item, void (*removed_callback)(T) = NULL) {
+  void push(T item, std::function<void(T)> removed_callback = NULL) {
     if (this->index_map->find(item) != this->index_map->end())
       throw EHeapQAlreadyPresentExc;
 
@@ -408,7 +409,6 @@ public:
 private:
   std::vector<T> *heap; /**< The raw vector of items stored in the heap. */
   size_t size;          /**< The maximum number of items stored in the heap. */
-  Compare comp;         /**< The function class that implements comparision. */
   T last_item;          /**< The last item stored. */
   bool last_item_set;   /**< Set to true if the last item is present, false otherwise. */
   T max_item;           /**< The max item stored. */
