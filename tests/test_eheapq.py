@@ -45,7 +45,7 @@ class TestEHeapq(FextTestBase):
 
         assert sys.getrefcount(a) == sys.getrefcount(b)
 
-        heap.push(a)
+        heap.push(1.0, a)
         heapq.heappush(arr, b)
 
         assert sys.getrefcount(a) == sys.getrefcount(b)
@@ -59,7 +59,7 @@ class TestEHeapq(FextTestBase):
 
         assert sys.getrefcount(a) == sys.getrefcount(b)
 
-        heap.push(a)
+        heap.push(1.0, a)
         heapq.heappush(arr, b)
 
         assert sys.getrefcount(a) == sys.getrefcount(b)
@@ -76,7 +76,7 @@ class TestEHeapq(FextTestBase):
         a, b = "foo_top", "bar_top"
 
         assert sys.getrefcount(a) == sys.getrefcount(b)
-        heap.push(a)
+        heap.push(1.0, a)
         assert sys.getrefcount((a)) == sys.getrefcount(b) + 1
         assert heap.get_top() == a
         assert sys.getrefcount((a)) == sys.getrefcount(b) + 1
@@ -89,7 +89,7 @@ class TestEHeapq(FextTestBase):
 
         assert sys.getrefcount(a) == sys.getrefcount(b)
 
-        heap.push(a)
+        heap.push(1.0, a)
 
         assert sys.getrefcount(a) == sys.getrefcount(b) + 1
         assert heap.get_last() == a
@@ -99,7 +99,7 @@ class TestEHeapq(FextTestBase):
         """Test manipulation with reference counter on pushpop - compare with the standard heapq."""
         heap = ExtHeapQueue()
         a = "foo_pushpop_1"
-        heap.pushpop(a)
+        heap.pushpop(1.0, a)
 
     def test_pushpop_refcount_saved(self) -> None:
         """Test manipulation with reference counter on pushpop - the item is stored in heap."""
@@ -108,8 +108,8 @@ class TestEHeapq(FextTestBase):
         a1 = "zzzz"
         a2 = "fooo"
 
-        heap.push(a1)
-        assert heap.pushpop(a2) == a2
+        heap.push(1.0, a1)
+        assert heap.pushpop(0.1, a2) == a2
         assert heap.get_top() == a1
         assert heap.pop() == a1
 
@@ -120,7 +120,7 @@ class TestEHeapq(FextTestBase):
 
         a, b = "foo_remove", "bar_remove"
 
-        heap.push(a)
+        heap.push(1.0, a)
         heapq.heappush(arr, b)
 
         assert sys.getrefcount(a) == sys.getrefcount(b)
@@ -130,26 +130,6 @@ class TestEHeapq(FextTestBase):
 
         assert sys.getrefcount(a) == sys.getrefcount(b)
 
-    def test_replace_refcount(self) -> None:
-        """Test manipulation with reference counter on replace - compare with the standard heapq."""
-        heap = ExtHeapQueue()
-        arr = []
-
-        a, b = "foo_replace", "bar_replace"
-        c, d = "baz_replace", "ban_replace"
-
-        heap.push(a)
-        heapq.heappush(arr, b)
-
-        assert sys.getrefcount(a) == sys.getrefcount(b)
-        assert sys.getrefcount(c) == sys.getrefcount(d)
-
-        heap.replace(c)
-        heapq.heapreplace(arr, d)
-
-        assert sys.getrefcount(a) == sys.getrefcount(b)
-        assert sys.getrefcount(c) == sys.getrefcount(d)
-
     def test_max_refcount(self) -> None:
         """Test manipulation with reference counter on max - compare with the standard heapq."""
         heap = ExtHeapQueue()
@@ -157,7 +137,7 @@ class TestEHeapq(FextTestBase):
         a, b = "foo_max", "bar_max"
 
         assert sys.getrefcount(a) == sys.getrefcount(b)
-        heap.push(a)
+        heap.push(1.0, a)
         assert sys.getrefcount((a)) == sys.getrefcount(b) + 1
         assert heap.get_max() == a
         assert sys.getrefcount((a)) == sys.getrefcount(b) + 1
@@ -167,30 +147,18 @@ class TestEHeapq(FextTestBase):
         heap = ExtHeapQueue()
 
         assert len(heap) == 0
-        heap.push(1)
+        heap.push(1.0, 1)
         assert len(heap) == 1
         assert heap.pop() == 1
-
-    def _test_push_not_comparable(self) -> None:
-        """Test pushing an item that raises an error on comparision."""
-        heap = ExtHeapQueue()
-
-        a1 = _A()
-        a2 = _A()
-        heap.push(a1)
-        with pytest.raises(ValueError, match="failed to compare Python objects"):
-            heap.push(a2)
-
-        assert len(heap) == 1
 
     def test_push_already_present(self) -> None:
         """Test pushing an item that is already present on heap."""
         heap = ExtHeapQueue()
 
-        heap.push(1)
+        heap.push(1.0, 1)
         assert len(heap) == 1
         with pytest.raises(ValueError, match="the given item is already present in the heap"):
-            heap.push(1)
+            heap.push(1.0, 1)
 
         assert len(heap) == 1
 
@@ -213,7 +181,7 @@ class TestEHeapq(FextTestBase):
         arr = list(dict.fromkeys(arr).keys())
 
         for item in arr:
-            heap.push(item)
+            heap.push(float(item), item)
 
         result = []
         while len(heap) != 0:
@@ -226,13 +194,13 @@ class TestEHeapq(FextTestBase):
         """Test manipulation with the top (the smallest) item recorded."""
         heap = ExtHeapQueue()
 
-        heap.push(10)
+        heap.push(10.0, 10)
         assert heap.get_top() == 10
 
-        heap.push(-10)
+        heap.push(-10.0, -10)
         assert heap.get_top() == -10
 
-        heap.push(100)
+        heap.push(100.0, 100)
         assert heap.get_top() == -10
 
         heap.remove(100)
@@ -248,13 +216,13 @@ class TestEHeapq(FextTestBase):
         with pytest.raises(KeyError, match="the heap is empty"):
             heap.get_top()
 
-        heap.push(1)
+        heap.push(1.0, 1)
         heap.remove(1)
 
         with pytest.raises(KeyError, match="the heap is empty"):
             heap.get_top()
 
-        heap.push(1)
+        heap.push(1.0, 1)
         heap.pop()
 
         with pytest.raises(KeyError, match="the heap is empty"):
@@ -264,13 +232,13 @@ class TestEHeapq(FextTestBase):
         """Test obtaining a max from a heap."""
         heap = ExtHeapQueue()
 
-        heap.push(10)
+        heap.push(10.0, 10)
         assert heap.get_max() == 10
 
-        heap.push(-10)
+        heap.push(-10.0, -10)
         assert heap.get_max() == 10
 
-        heap.push(100)
+        heap.push(100.0, 100)
         assert heap.get_max() == 100
 
         heap.remove(100)
@@ -286,13 +254,13 @@ class TestEHeapq(FextTestBase):
         with pytest.raises(KeyError, match="the heap is empty"):
             heap.get_max()
 
-        heap.push(1)
+        heap.push(1.0, 1)
         heap.remove(1)
 
         with pytest.raises(KeyError, match="the heap is empty"):
             heap.get_max()
 
-        heap.push(1)
+        heap.push(1.0, 1)
         heap.pop()
 
         with pytest.raises(KeyError, match="the heap is empty"):
@@ -305,13 +273,13 @@ class TestEHeapq(FextTestBase):
         with pytest.raises(KeyError, match="the heap is empty"):
             heap.get_last()
 
-        heap.push(1)
+        heap.push(1.0, 1)
         heap.remove(1)
 
         with pytest.raises(KeyError, match="the heap is empty"):
             heap.get_last()
 
-        heap.push(1)
+        heap.push(1.0, 1)
         heap.pop()
 
         with pytest.raises(KeyError, match="the heap is empty"):
@@ -321,16 +289,16 @@ class TestEHeapq(FextTestBase):
         """Test obtaining a last item from a heap."""
         heap = ExtHeapQueue()
 
-        heap.push(6)
+        heap.push(6.0, 6)
         assert heap.get_last() == 6
 
-        heap.push(3)
+        heap.push(3.0, 3)
         assert heap.get_last() == 3
 
         heap.remove(3)
         assert heap.get_last() is None
 
-        heap.push(8)
+        heap.push(8.0, 8)
         assert heap.get_last() == 8
 
         heap.pop()
@@ -348,14 +316,14 @@ class TestEHeapq(FextTestBase):
         obj1 = "090x"
         obj2 = "090X"
 
-        heap.push(obj1)
-        heap.push(obj2)
+        heap.push(1.0, obj1)
+        heap.push(2.0, obj2)
 
         heap.remove(obj1)
         assert len(heap) == 1
         assert heap.pop() == obj2
 
-        heap.push(obj2)
+        heap.push(2.0, obj2)
         heap.remove(obj2)
         assert len(heap) == 0
 
@@ -363,7 +331,7 @@ class TestEHeapq(FextTestBase):
         """Test remove method when item is not found."""
         heap = ExtHeapQueue()
 
-        heap.push(1984)
+        heap.push(1984.0, 1984)
         with pytest.raises(ValueError, match="the given item was not found in the heap"):
             heap.remove(1992)
 
@@ -374,97 +342,39 @@ class TestEHeapq(FextTestBase):
         with pytest.raises(ValueError, match="the given item was not found in the heap"):
             heap.remove(1992)
 
-    def test_replace(self) -> None:
-        """Test replace method."""
-        heap = ExtHeapQueue()
-
-        obj1 = "2-thoth"
-        obj2 = "1-station"
-        obj3 = "3-thamos"
-
-        heap.push(obj1)
-        heap.push(obj2)
-        assert len(heap) == 2
-
-        heap.replace(obj3)
-        assert len(heap) == 2
-
-        assert heap.pop() == obj1
-        assert heap.pop() == obj3
-
-    def test_replace_empty(self) -> None:
-        """Test replace method with empty heap."""
-        heap = ExtHeapQueue()
-
-        with pytest.raises(KeyError, match="the heap is empty"):
-            heap.replace("foo_replace_empty")
-
-    def test_replace_already_present(self) -> None:
-        """Test replace method when the item is already present."""
-        heap = ExtHeapQueue()
-
-        a = "11111"
-        heap.push(a)
-
-        with pytest.raises(ValueError, match="the given item is already present in the heap"):
-            heap.replace(a)
-
-    def _test_replace_not_comparable(self) -> None:
-        """Test replace method when items are not comparable."""
-        # XXX: This test is disabled as it can break the interpreter by not proper handling of ref
-        # counts. It's strongly advised to check code that is running fext.
-        heap = ExtHeapQueue()
-
-        heap.push("1")
-        heap.push("2")
-
-        a = _A()
-        with pytest.raises(ValueError, match="failed to compare Python objects"):
-            heap.replace(a)
-
     def test_pushpop(self) -> None:
         """Test pushpop method."""
         heap = ExtHeapQueue()
 
-        heap.push("1")
-        assert heap.pushpop("2") == "1"
-        assert heap.pushpop("0") == "0"
+        heap.push(1.0, "1")
+        assert heap.pushpop(2.0, "2") == "1"
+        assert heap.pushpop(0.0, "0") == "0"
         assert heap.pop() == "2"
-
-    def _test_pushpop_not_comparable(self) -> None:
-        """Test pushpop method when items are not comparable."""
-        heap = ExtHeapQueue()
-
-        heap.push(1)
-        heap.push(2)
-
-        with pytest.raises(ValueError, match="failed to compare Python objects"):
-            heap.replace(_A())
 
     def test_pushpop_empty(self) -> None:
         """Test pushpop method when the heap is empty."""
         heap = ExtHeapQueue()
 
-        assert heap.pushpop(1) == 1
+        assert heap.pushpop(1.0, 1) == 1
 
-        heap.push(2)
+        heap.push(2.0, 2)
         heap.remove(2)
 
-        assert heap.pushpop(3) == 3
+        assert heap.pushpop(3.0, 3) == 3
 
-        heap.push(4)
+        heap.push(4.0, 4)
         heap.pop()
 
-        assert heap.pushpop(5) == 5
+        assert heap.pushpop(5.0, 5) == 5
 
     def test_pushpop_already_present(self) -> None:
         """Test pushpop method when the item is already present in the heap."""
         heap = ExtHeapQueue()
 
-        heap.push("33")
+        heap.push(3.3, "33")
 
         with pytest.raises(ValueError, match="the given item is already present in the heap"):
-            heap.pushpop("33")
+            heap.pushpop(3.3, "33")
 
     def test_push_size(self) -> None:
         """Test push is respecting the size configured."""
@@ -478,9 +388,9 @@ class TestEHeapq(FextTestBase):
         a2_refcount = sys.getrefcount(a2)
         a3_refcount = sys.getrefcount(a3)
 
-        heap.push(a1)
-        heap.push(a2)
-        heap.push(a3)
+        heap.push(1.11, a1)
+        heap.push(2.22, a2)
+        heap.push(3.33, a3)
 
         assert heap.size == 2
         assert len(heap) == 2
@@ -496,9 +406,9 @@ class TestEHeapq(FextTestBase):
         """Test cleaning the heap."""
         heap = ExtHeapQueue()
 
-        heap.push("1111")
-        heap.push("2222")
-        heap.push("3333")
+        heap.push(1.111, "1111")
+        heap.push(2.222, "2222")
+        heap.push(3.333, "3333")
 
         heap.clear()
 
@@ -508,12 +418,12 @@ class TestEHeapq(FextTestBase):
         """Test getting an element by its index."""
         heap = ExtHeapQueue()
 
-        heap.push("101")
+        heap.push(1.01, "101")
 
         assert heap.get(0) == "101"
 
-        heap.push("202")
-        heap.push("303")
+        heap.push(2.02, "202")
+        heap.push(3.03, "303")
 
         possibilities = {"101", "202", "303"}
 
@@ -534,8 +444,8 @@ class TestEHeapq(FextTestBase):
         with pytest.raises(IndexError, match="index out of range"):
             heap.get(199)
 
-        heap.push("11")
-        heap.push("22")
+        heap.push(1.1, "11")
+        heap.push(2.2, "22")
 
         with pytest.raises(IndexError, match="index out of range"):
             heap.get(110)
@@ -546,8 +456,8 @@ class TestEHeapq(FextTestBase):
 
         assert heap.items() == []
 
-        heap.push("11")
-        heap.push("22")
-        heap.push("33")
+        heap.push(1.1, "11")
+        heap.push(2.2, "22")
+        heap.push(3.3, "33")
 
         assert set(heap.items()) == {"11", "22", "33"}

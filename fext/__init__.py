@@ -21,7 +21,6 @@ __title__ = "thoth-adviser"
 __version__ = "0.1.3"
 __author__ = "Fridolin Pokorny <fridolin@redhat.com>"
 
-from .edict import ExtDict
 from .eheapq import ExtHeapQueue
 
 __all__ = [
