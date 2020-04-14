@@ -14,7 +14,7 @@ Extended heapq - fext.ExtHeapQueue
 The extended heap queue acts as a min-heap queue from the standard Python
 library.  It uses a hash table for storing information about indexes (where
 values sit in the min-heap queue) to optimize removals from the heap
-to O(log(N)).
+to O(log(N)) in comparision to the original O(N+N*log(N)).
 
 .. figure:: https://raw.githubusercontent.com/thoth-station/fext/master/fig/fext_extheapq.png
    :scale: 40%
