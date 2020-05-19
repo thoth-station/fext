@@ -8,7 +8,7 @@ built-in types. The implementation relies on enforced protocol - all the
 objects and abstract data types are implemented in C/C++ to provide highly
 effective manipulation.
 
-See `this video for more info <https://www.youtube.com/watch?v=p0ECHhrxEq0>`__.
+See `this video for more info <https://youtu.be/B7GsCVFpaXo?t=2235>`__.
 
 Extended heapq - fext.ExtHeapQueue
 ==================================
