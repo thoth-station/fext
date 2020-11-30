@@ -12,3 +12,6 @@ pytest-valgrind = "*"
 pytest-random-order = "*"
 
 [packages]
+
+[requires]
+python_version = "3.8"
