@@ -54,6 +54,19 @@ If you would like to produce binaries with debug information:
 
 Check sections below for more info on testing the C/C++ parts of extensions.
 
+When building extension for a more recent Python releases (e.g. Python 3.8) build the extension
+inside the container image so that it provides required libraries with the required symbols:
+
+```console
+cd fext/
+podman run --rm --workdir /io --entrypoint bash -it --volume `pwd`:/io:Z quay.io/pypa/manylinux2014_x86_64
+yum install -y rh-python38-python-setuptools-wheel rh-python38-python rh-python38-python-devel rh-python38-python-wheel
+scl enable rh-python38 bash
+python3 setup.py bdist_wheel
+auditwheel repair dist/*
+twine upload dist/*
+```
+
 Reference count and memory leak checks
 ======================================
 
