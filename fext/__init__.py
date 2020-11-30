@@ -18,7 +18,7 @@
 """Extensions to standard Python's heapq for performance applications."""
 
 __title__ = "thoth-adviser"
-__version__ = "0.1.3"
+__version__ = "0.2.0"
 __author__ = "Fridolin Pokorny <fridolin@redhat.com>"
 
 from .eheapq import ExtHeapQueue
