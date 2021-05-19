@@ -182,3 +182,4 @@ Usage
 
 These data structures were designed for Thoth's adviser - for data kept in
 resolver's internal state as well as in the reinforcement learning part.
+
