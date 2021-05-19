@@ -302,7 +302,7 @@ class TestEHeapq(FextTestBase):
         assert heap.get_last() == 8
 
         heap.pop()
-        assert heap.get_last() is 8
+        assert heap.get_last() == 8
 
         assert len(heap) == 1
 
