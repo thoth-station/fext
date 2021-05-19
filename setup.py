@@ -1,11 +1,14 @@
+#!/usr/bin/env python3
+"""This file contains packaging information for fext module."""
+
 import os
 import sys
-from setuptools.command.test import test as TestCommand
+from setuptools.command.test import test as test_command
 from setuptools import Extension
 from setuptools import setup
 
 
-class Test(TestCommand):
+class Test(test_command):
     """Introduce test command to run test suite using pytest."""
 
     _IMPLICIT_PYTEST_ARGS = [
@@ -23,15 +26,18 @@ class Test(TestCommand):
     user_options = [("pytest-args=", "a", "Arguments to pass into py.test")]
 
     def initialize_options(self):
+        """Initialize command options."""
         super().initialize_options()
         self.pytest_args = None
 
     def finalize_options(self):
+        """Finalize command options."""
         super().finalize_options()
         self.test_args = []
         self.test_suite = True
 
     def run_tests(self):
+        """Run pytests."""
         import pytest
 
         passed_args = list(self._IMPLICIT_PYTEST_ARGS)
@@ -44,6 +50,7 @@ class Test(TestCommand):
 
 
 def get_version():
+    """Get the version of the package."""
     with open(os.path.join("fext", "__init__.py")) as f:
         content = f.readlines()
 
@@ -55,6 +62,7 @@ def get_version():
 
 
 def read(fname):
+    """Read file."""
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
 
@@ -74,7 +82,7 @@ setup(
         Extension(
             "fext.eheapq",
             sources=["fext/eheapq.cpp"],
-            extra_compile_args = ["-std=c++11"],
+            extra_compile_args=["-std=c++11"],
         ),
     ],
     cmdclass={"test": Test},
