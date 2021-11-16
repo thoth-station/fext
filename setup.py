@@ -70,6 +70,9 @@ setup(
     download_url="https://pypi.org/project/fext",
     license="GPLv3+",
     packages=["fext"],
+    package_data={
+        "fext": ["py.typed", "__init__.pyi"],
+    },
     ext_modules=[
         Extension(
             "fext.eheapq",
